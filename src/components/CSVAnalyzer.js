@@ -1,20 +1,22 @@
 import React, { Component } from 'react';
 import PapaParse from 'papaparse';
+const levenshtein = require('fast-levenshtein');
+
 
 class CSVAnalyzer extends Component {
 
   constructor(props) { 
-    // Call super class
     super(props); 
 
     this.state = {
-      csvSet: new Set()
+      
     }
 
     // Bind functions
     this.onFileLoaded = this.onFileLoaded.bind(this);
     this.findDuplicates = this.findDuplicates.bind(this);
   }
+  
 
   handleFileChange = e => {
     let reader = new FileReader();
@@ -35,11 +37,60 @@ class CSVAnalyzer extends Component {
   }
 
   findDuplicates = (data) => {
-    let duplicates = [];
+    let seen = {};
+    let dupes = [];
 
-    duplicates = data.map((el, index, array) => {
+    // Sort data alphabetically (using first_name)
+    data.sort((a, b) => a.first_name.localeCompare(b.first_name));
 
+    // Use 'reduce' to generate unique key using first and last name.
+    // Entries sharing the same key will be grouped together, allowing
+    // us to find the easy duplicates.
+    let groupedData = data.reduce((res, val) => {
+      let key = val.first_name + '-' + val.last_name;
+      res[key] = res[key] || [];
+      res[key].push(val);
+      return res;
+    },{});
+
+    // Make a second pass iterating through the keys to catch potential
+    // outlier dupes (typos, etc) using the Levenshtein distance algorithm
+    Object.keys(groupedData).forEach((key, index, arr) => {
+      
     });
+
+    console.log(groupedData);
+
+   
+
+    //console.log(groupedData);
+
+    //console.log(levenshtein.get('Jacqueline-Ilchenko', 'Jacquelyn-Ilchenko'))
+
+    /*
+    var result = Object.values(data.reduce((, row) => {
+      let key = row['first_name'] + '-' + row['last_name'];
+      entries[key] = entries[key] || [];
+      entries[key].push(row);
+      return entries;
+    },)).reduce((c, v) => { 
+      console.log(v)
+      return v.length > 1 ? c.concat(v) : c;
+    }, []);
+
+
+*/
+
+    //console.log(result);
+    console.log(dupes);
+
+    
+
+    
+    
+    //.reduce((c, v) => v.length > 0 ? c.concat(v) : c, []);
+
+    //console.log(data);
   }
 
   // Callback
