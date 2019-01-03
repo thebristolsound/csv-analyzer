@@ -12,6 +12,14 @@ class CSVAnalyzer extends Component {
   constructor(props) { 
     super(props); 
 
+    this.state = {
+      fileProcessed: false,
+      rowCount: 0,
+      dupeCount: null,
+      uniqueCount: null,
+      messaging: 'Select a File'
+    }
+
     this.data = [];
     this.dataMap = [];
     this.uniques = [];
@@ -27,7 +35,8 @@ class CSVAnalyzer extends Component {
    * Handle a CSV upload 
    * @param {Object} FileList 
    */
-  handleFileChange = (input) => {
+  handleFileChange(input) {
+
     // Instantiate a FileReader to load our CSV file into
     let reader = new FileReader();
     const filename = input.target.files[0].name;
@@ -53,8 +62,13 @@ class CSVAnalyzer extends Component {
   }
 
   // Callback for CSV upload
-  onFileLoaded = (data, filename) => {
+  onFileLoaded(data, filename) {
     console.log('Successfully loaded ' + filename);
+    this.setState({
+      messaging: 'Successfully processed ' + data.length + ' rows',
+      fileProcessed: true,
+      rowCount: data.length
+    });
     this.data = data;
     this.findDuplicates(this.data);
   }
@@ -65,7 +79,7 @@ class CSVAnalyzer extends Component {
    * @param {Object[]} data
    * @public
    */
-  findDuplicates = (data) => {
+  findDuplicates(data){
 
     /**
      * Create a new collection on this class, adding an additional 
@@ -96,6 +110,11 @@ class CSVAnalyzer extends Component {
       return !this.uniques.includes(val);
     });
 
+    this.setState({
+      uniqueCount: this.uniques.length,
+      dupeCount: this.duplicates.length
+    });
+
     this.printResults();
   }
 
@@ -107,7 +126,7 @@ class CSVAnalyzer extends Component {
    * @param {Object} b
    * @public
   */
-  isUnique = (a, b) => {
+  isUnique(a, b){
     let dist = levenshtein.get(a['key'], b['key']);
     return (dist >= 0 && dist <= 3);
   }
@@ -120,7 +139,7 @@ class CSVAnalyzer extends Component {
     console.log('Potential Duplicates: (' + this.duplicates.length + ')');
     console.log('..........');
     this.duplicates.forEach(val => console.log(JSON.stringify(val)));
-    console.log('..........');
+    console.log('');
     console.log('Non Duplicates: (' + this.uniques.length + ')');
     console.log('..........');
     this.uniques.forEach(val => console.log(JSON.stringify(val)));
@@ -131,16 +150,36 @@ class CSVAnalyzer extends Component {
   render () {
     return (
       <div className="container">
-        <div className="csv-analyzer">
-          <label htmlFor="csvFileInput">Select a CSV</label>
-          <input
-            className="css-file-input"
-            type="file"
-            id="csvFileInput"
-            accept=".csv, text/csv"
-            onChange={e => this.handleFileChange(e)}
-          />
-        </div>
+          <div className="csv-analyzer">
+            <form>
+              <div className="form-group">
+                <label htmlFor="csvFileInput">File Upload</label>
+                <input
+                  className="form-control-file"
+                  type="file"
+                  id="csvFileInput"
+                  accept=".csv, text/csv"
+                  onChange={e => this.handleFileChange(e)}
+                />
+                <small id="fileHelpBlock" className="form-text text-muted">Please select a CSV (comma-separated value, .csv) to begin.</small>
+              </div>
+              {this.state.fileProcessed &&
+                <div className="alert alert-secondary" role="alert">
+                  {this.state.messaging}. Open the developer console to see the output.
+                </div>
+              }
+              {this.state.dupeCount &&
+                <div className="alert alert-primary" role="alert">
+                I found {this.state.dupeCount} potential duplicate rows.
+              </div>
+              }
+              {this.state.uniqueCount &&
+                <div className="alert alert-success" role="alert">
+                I found {this.state.uniqueCount} unique rows.
+              </div>
+              }
+            </form>
+          </div>
       </div>
     )
   }
