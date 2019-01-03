@@ -1,4 +1,4 @@
-#CSV Analyzer Demo
+# CSV Analyzer Demo
 
 ## Usage
 This project was built using Yarn as a package manager, it can be installed globally using Homebrew. 
