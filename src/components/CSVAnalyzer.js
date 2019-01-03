@@ -79,7 +79,7 @@ class CSVAnalyzer extends Component {
    * @param {Object[]} data
    * @public
    */
-  findDuplicates(data){
+  findDuplicates(data) {
 
     /**
      * Create a new collection on this class, adding an additional 
@@ -106,9 +106,7 @@ class CSVAnalyzer extends Component {
      * Find the duplicates by finding the difference between our
      * original data collection and our uniques
      */
-    this.duplicates = this.dataMap.filter((val) => {
-      return !this.uniques.includes(val);
-    });
+    this.duplicates = this.dataMap.filter((val) => !this.uniques.includes(val));
 
     this.setState({
       uniqueCount: this.uniques.length,
