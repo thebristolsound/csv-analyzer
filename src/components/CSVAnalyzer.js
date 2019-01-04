@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
+import TabLayout from './TabLayout.js';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import PapaParse from 'papaparse';
 import { uniqWith } from 'lodash';
-
-// Levenshtein implementation from https://github.com/hiddentao/fast-levenshtein#readme
-const levenshtein = require('fast-levenshtein');
 
 /**
  * Simple component for taking in and processing a CSV
@@ -13,11 +13,13 @@ class CSVAnalyzer extends Component {
     super(props); 
 
     this.state = {
-      fileProcessed: false,
-      rowCount: 0,
       dupeCount: null,
+      duplicateRows: null,
+      fileProcessed: false,
+      messaging: 'Select a File',
+      rowCount: 0,
       uniqueCount: null,
-      messaging: 'Select a File'
+      uniqueRows: null,
     }
 
     this.data = [];
@@ -27,9 +29,12 @@ class CSVAnalyzer extends Component {
 
     // Bind functions
     this.onFileLoaded = this.onFileLoaded.bind(this);
-    this.findDuplicates = this.findDuplicates.bind(this);
+    this.processData = this.processData.bind(this);
     this.isUnique = this.isUnique.bind(this);
   }
+
+  // Levenshtein implementation from https://github.com/hiddentao/fast-levenshtein#readme
+  levenshtein = require('fast-levenshtein');
   
   /**
    * Handle a CSV upload 
@@ -67,20 +72,17 @@ class CSVAnalyzer extends Component {
     this.setState({
       messaging: 'Successfully processed ' + data.length + ' rows',
       fileProcessed: true,
-      rowCount: data.length
     });
     this.data = data;
-    this.findDuplicates(this.data);
+    this.processData(this.data);
   }
-
 
   /**
    * Find duplicate and unique values within a given data set
    * @param {Object[]} data
    * @public
    */
-  findDuplicates(data) {
-
+  processData(data) {
     /**
      * Create a new collection on this class, adding an additional 
      * for 'key' property generated from the 'first_name' and 'last_name'
@@ -108,12 +110,16 @@ class CSVAnalyzer extends Component {
      */
     this.duplicates = this.dataMap.filter((val) => !this.uniques.includes(val));
 
+    // Update state with new data
     this.setState({
       uniqueCount: this.uniques.length,
-      dupeCount: this.duplicates.length
+      dupeCount: this.duplicates.length,
+      uniqueRows: this.uniques,
+      duplicateRows: this.duplicates,
+      showTable: true
     });
 
-    this.printResults();
+    //this.printResults();
   }
 
   /** 
@@ -125,13 +131,12 @@ class CSVAnalyzer extends Component {
    * @public
   */
   isUnique(a, b){
-    let dist = levenshtein.get(a['key'], b['key']);
+    let dist = this.levenshtein.get(a['key'], b['key']);
     return (dist >= 0 && dist <= 3);
   }
 
   /** 
    * Print results to console
-   * 
    */
   printResults() {
     console.log('Potential Duplicates: (' + this.duplicates.length + ')');
@@ -146,41 +151,46 @@ class CSVAnalyzer extends Component {
 
   // Render function
   render () {
+    const { 
+      showTable, 
+      uniqueRows, 
+      duplicateRows, 
+      fileProcessed,
+      messaging 
+    } = this.state;
+    
     return (
-      <div className="container">
-          <div className="csv-analyzer">
+      <div className="CSVAnalyzer container">
+          <div style={{padding: '10px'}}>
             <form>
               <div className="form-group">
-                <label htmlFor="csvFileInput">File Upload</label>
+                <label htmlFor="csvFileInput">
+                  <Button variant="raised" component="span">
+                    Browse Files
+                  </Button>
+                </label> 
                 <input
                   className="form-control-file"
                   type="file"
                   id="csvFileInput"
                   accept=".csv, text/csv"
+                  style={{display: 'none'}}
                   onChange={e => this.handleFileChange(e)}
                 />
-                <small id="fileHelpBlock" className="form-text text-muted">Please select a CSV (comma-separated value, .csv) to begin.</small>
               </div>
-              {this.state.fileProcessed &&
-                <div className="alert alert-secondary" role="alert">
-                  {this.state.messaging}. Open the developer console to see the output.
-                </div>
-              }
-              {this.state.dupeCount &&
-                <div className="alert alert-primary" role="alert">
-                I found {this.state.dupeCount} potential duplicate rows.
-              </div>
-              }
-              {this.state.uniqueCount &&
-                <div className="alert alert-success" role="alert">
-                I found {this.state.uniqueCount} unique rows.
-              </div>
+              {fileProcessed &&
+                <Typography variant="caption" style={{paddingTop: '10px'}}>
+                  {messaging}. Open the developer console to see extended output.
+                </Typography>
               }
             </form>
           </div>
+          {showTable &&
+              <TabLayout duplicates={duplicateRows} uniques={uniqueRows} />
+          }
       </div>
     )
   }
 }
-
 export default CSVAnalyzer;
+
