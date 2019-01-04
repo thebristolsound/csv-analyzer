@@ -11,7 +11,6 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
-import { lighten } from '@material-ui/core/styles/colorManipulator';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {

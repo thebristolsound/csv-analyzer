@@ -46,8 +46,8 @@ class TabLayout extends Component {
       <div className={classes.root}>
         <AppBar position="static">
           <Tabs value={value} onChange={this.handleChange}>
-            <Tab label="Non Duplicates" />
-            <Tab label="Potential Duplicates" />
+            <Tab label={"Non Duplicates ("+uniques.length+")"}  />
+            <Tab label={"Potential Duplicates ("+duplicates.length+")"} />
           </Tabs>
         </AppBar>
         {value === 0 && 

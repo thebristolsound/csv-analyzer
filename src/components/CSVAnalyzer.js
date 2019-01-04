@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import TabLayout from './TabLayout.js';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import PapaParse from 'papaparse';
 import { uniqWith } from 'lodash';
 
@@ -75,11 +77,6 @@ class CSVAnalyzer extends Component {
     this.processData(this.data);
   }
 
-  findUniques() {
-
-  }
-
-
   /**
    * Find duplicate and unique values within a given data set
    * @param {Object[]} data
@@ -154,40 +151,42 @@ class CSVAnalyzer extends Component {
 
   // Render function
   render () {
+    const { 
+      showTable, 
+      uniqueRows, 
+      duplicateRows, 
+      fileProcessed,
+      messaging 
+    } = this.state;
+    
     return (
       <div className="CSVAnalyzer container">
-          <div>
+          <div style={{padding: '10px'}}>
             <form>
               <div className="form-group">
-                <label htmlFor="csvFileInput">File Upload</label>
+                <label htmlFor="csvFileInput">
+                  <Button variant="raised" component="span">
+                    Browse Files
+                  </Button>
+                </label> 
                 <input
                   className="form-control-file"
                   type="file"
                   id="csvFileInput"
                   accept=".csv, text/csv"
+                  style={{display: 'none'}}
                   onChange={e => this.handleFileChange(e)}
                 />
-                <small id="fileHelpBlock" className="form-text text-muted">Please select a CSV (comma-separated value, .csv) to begin.</small>
               </div>
-              {this.state.fileProcessed &&
-                <div className="alert alert-secondary" role="alert">
-                  {this.state.messaging}. Open the developer console to see the output.
-                </div>
-              }
-              {this.state.dupeCount &&
-                <div className="alert alert-primary" role="alert">
-                I found {this.state.dupeCount} potential duplicate rows.
-              </div>
-              }
-              {this.state.uniqueCount &&
-                <div className="alert alert-success" role="alert">
-                I found {this.state.uniqueCount} unique rows.
-              </div>
+              {fileProcessed &&
+                <Typography variant="caption" style={{paddingTop: '10px'}}>
+                  {messaging}. Open the developer console to see extended output.
+                </Typography>
               }
             </form>
           </div>
-          {this.state.showTable &&
-            <TabLayout duplicates={this.state.duplicateRows} uniques={this.state.uniqueRows} />
+          {showTable &&
+              <TabLayout duplicates={duplicateRows} uniques={uniqueRows} />
           }
       </div>
     )
