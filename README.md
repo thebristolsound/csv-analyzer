@@ -25,12 +25,13 @@ consisting of user data / contact information. The only required fields right no
 used to generate dynamic keys for sorting and comparison. Upon uploading a file, it automatically parses each row in the `normal.csv`
 test file and identifies exact duplicates as well as fuzzy matched duplicates using the Levenshtein Distance (LD) algorithm.
 
-The output of the analysis is displayed in the developer console, and the UI reacts with basic feedback about the state of the application.  The code itself, specifically the `CSVAnalyzer` component is filled with comments explaining what's going on, so definitely take a look.
+The output of the analysis is displayed in a sortable and paginated table, currently showing select fields for each row for the sake of keeping the UI uncluttered. The full output is displayed in the developer console and contains all values associated with each record. The code itself, specifically the `CSVAnalyzer` component is filled with comments explaining what's going on, so definitely take a look.
+
+The UI is leveraging the Material-UI component library for its basic style and formatting.
 
 There are a few known issues / todos:
 * The app is able to properly identify the duplicate values within a given dataset and remove them from the result set into a separate bucket. The console output correctly reflects this, but instead of outputting the potential duplicates in pairs (as asked in the assignment), it reports the duplicated rows that were omitted from the unique result set only. This is only a minor issue with the display output.
-* There are areas for optimization performance wise, specifically with array traversing/comparison as well as the implementation of the LD fuzzy matching. 
-* The stringified JSON output of each row in the result set could look nicer.
+* Some additional UI customization (transitions, notifications, etc) would be a nice to have.
 * Unit tests should be added for the CSVAnalyzer component, but for the sake of timeboxing the task they were omitted.
 
 
