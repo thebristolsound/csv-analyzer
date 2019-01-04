@@ -119,7 +119,7 @@ class CSVAnalyzer extends Component {
       showTable: true
     });
 
-    //this.printResults();
+    this.printResults();
   }
 
   /** 
