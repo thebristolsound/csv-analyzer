@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
+import TabLayout from './TabLayout.js';
 import PapaParse from 'papaparse';
 import { uniqWith } from 'lodash';
-
-// Levenshtein implementation from https://github.com/hiddentao/fast-levenshtein#readme
-const levenshtein = require('fast-levenshtein');
 
 /**
  * Simple component for taking in and processing a CSV
@@ -13,11 +11,13 @@ class CSVAnalyzer extends Component {
     super(props); 
 
     this.state = {
-      fileProcessed: false,
-      rowCount: 0,
       dupeCount: null,
+      duplicateRows: null,
+      fileProcessed: false,
+      messaging: 'Select a File',
+      rowCount: 0,
       uniqueCount: null,
-      messaging: 'Select a File'
+      uniqueRows: null,
     }
 
     this.data = [];
@@ -27,9 +27,12 @@ class CSVAnalyzer extends Component {
 
     // Bind functions
     this.onFileLoaded = this.onFileLoaded.bind(this);
-    this.findDuplicates = this.findDuplicates.bind(this);
+    this.processData = this.processData.bind(this);
     this.isUnique = this.isUnique.bind(this);
   }
+
+  // Levenshtein implementation from https://github.com/hiddentao/fast-levenshtein#readme
+  levenshtein = require('fast-levenshtein');
   
   /**
    * Handle a CSV upload 
@@ -67,10 +70,13 @@ class CSVAnalyzer extends Component {
     this.setState({
       messaging: 'Successfully processed ' + data.length + ' rows',
       fileProcessed: true,
-      rowCount: data.length
     });
     this.data = data;
-    this.findDuplicates(this.data);
+    this.processData(this.data);
+  }
+
+  findUniques() {
+
   }
 
 
@@ -79,8 +85,7 @@ class CSVAnalyzer extends Component {
    * @param {Object[]} data
    * @public
    */
-  findDuplicates(data) {
-
+  processData(data) {
     /**
      * Create a new collection on this class, adding an additional 
      * for 'key' property generated from the 'first_name' and 'last_name'
@@ -108,12 +113,16 @@ class CSVAnalyzer extends Component {
      */
     this.duplicates = this.dataMap.filter((val) => !this.uniques.includes(val));
 
+    // Update state with new data
     this.setState({
       uniqueCount: this.uniques.length,
-      dupeCount: this.duplicates.length
+      dupeCount: this.duplicates.length,
+      uniqueRows: this.uniques,
+      duplicateRows: this.duplicates,
+      showTable: true
     });
 
-    this.printResults();
+    //this.printResults();
   }
 
   /** 
@@ -125,13 +134,12 @@ class CSVAnalyzer extends Component {
    * @public
   */
   isUnique(a, b){
-    let dist = levenshtein.get(a['key'], b['key']);
+    let dist = this.levenshtein.get(a['key'], b['key']);
     return (dist >= 0 && dist <= 3);
   }
 
   /** 
    * Print results to console
-   * 
    */
   printResults() {
     console.log('Potential Duplicates: (' + this.duplicates.length + ')');
@@ -147,8 +155,8 @@ class CSVAnalyzer extends Component {
   // Render function
   render () {
     return (
-      <div className="container">
-          <div className="csv-analyzer">
+      <div className="CSVAnalyzer container">
+          <div>
             <form>
               <div className="form-group">
                 <label htmlFor="csvFileInput">File Upload</label>
@@ -178,9 +186,12 @@ class CSVAnalyzer extends Component {
               }
             </form>
           </div>
+          {this.state.showTable &&
+            <TabLayout duplicates={this.state.duplicateRows} uniques={this.state.uniqueRows} />
+          }
       </div>
     )
   }
 }
-
 export default CSVAnalyzer;
+
